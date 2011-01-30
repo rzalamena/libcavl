@@ -1,0 +1,15 @@
+This is a AVL tree implementation that tries to be the most generic and
+safe as possible.
+
+Note: this implementation is not thread safe and maybe never will be.
+
+Status
+---
+Right now its just a binary tree and it lacks a lot of features.
+
+TODO
+---
+* Tree deletion
+* Tree node deletion
+* Node balance
+* Search
