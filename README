@@ -1,15 +1,18 @@
 This is a AVL tree implementation that tries to be the most generic and
 safe as possible.
 
-Note: this implementation is not thread safe and maybe never will be.
+Note: this implementation is not thread safe and maybe never will be,
+threads are never safe.
 
 Status
 ---
-Right now its just a binary tree and it lacks a lot of features.
+We can add items and see them sorted, there is no node removal or search yet.
+Balance functions are ready, batch insertion is ready as well, if you want to
+use it after a batch insertion you must call tree_balance, otherwise the tree
+will be unreliable / unusable.
 
 TODO
 ---
 * Tree deletion
 * Tree node deletion
-* Node balance
 * Search

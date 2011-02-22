@@ -1,5 +1,6 @@
 BIN	=	example
-OBJS	=	libcavl.o main.o
+BINALT	=	example_alt
+OBJS	=	libcavl.o
 RM	=	rm
 CC	=	gcc
 CFLAGS	+=	-Wall
@@ -12,13 +13,21 @@ CFLAGS	+=	-Wsign-compare
 
 .c.o:
 	@echo "CC	$<";
-	@$(CC) $(CFLAGS) -c $<
+	@$(CC) $(CFLAGS) -c $<;
 
-all: $(BIN)
+all: $(BIN) $(BINALT)
 
 $(BIN): $(OBJS)
+	@echo "CC	main.c";
+	@$(CC) -c main.c;
 	@echo "LD	$@";
-	@$(CC) -o $@ $(OBJS)
+	@$(CC) -o $@ $(OBJS) main.o;
+
+$(BINALT): $(OBJS)
+	@echo "CC	strings.c";
+	@$(CC) -c strings.c;
+	@echo "LD	$@";
+	@$(CC) -o $@ $(OBJS) strings.o;
 
 clean:
-	$(RM) -f $(BIN) $(OBJS)
+	$(RM) -f $(BIN) $(BIN).core main.o $(BINALT) $(BINALT).core strings.o $(OBJS);

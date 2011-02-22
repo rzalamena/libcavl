@@ -1,14 +1,15 @@
 #include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
 
 #include "libcavl.h"
 
 /* Numerical comparator used to order the tree */
 static int
-num_cmp(void *n1, void *n2)
+str_cmp(void *n1, void *n2)
 {
-	int	*na = n1, *nb = n2;
-	return (*na < *nb) ? -1 : 1;
+	const char *na = n1, *nb = n2;
+	return (strcmp(na, nb));
 }
 
 /* Print functions aren't provided with the libcavl,
@@ -19,7 +20,7 @@ num_cmp(void *n1, void *n2)
 static void
 treenode_print(struct treenode *n)
 {
-	int	*tmp;
+	const char	*tmp;
 
 	if (NULL == n)
 		return;
@@ -28,7 +29,7 @@ treenode_print(struct treenode *n)
 
 	if (n->left != NULL)
 		treenode_print(n->left);
-	printf(" %d", *tmp);
+	printf(" %s", tmp);
 	if (n->right != NULL)
 		treenode_print(n->right);
 }
@@ -37,7 +38,7 @@ static void
 treenode_print_alt(struct treenode *n, unsigned int h)
 {
 	unsigned int	 counter;
-	int		*tmp;
+	const char	*tmp;
 
 	if (NULL == n) {
 		for (counter = 0; counter < h; counter++) {
@@ -52,7 +53,7 @@ treenode_print_alt(struct treenode *n, unsigned int h)
 	for (counter = 0; counter < h; counter++) {
 		printf("\t");
 	}
-	printf("%d\n", *tmp);
+	printf("%s\n", tmp);
 
 	treenode_print_alt(n->left, (h + 1));
 }
@@ -67,27 +68,24 @@ tree_print(struct tree *t)
 int
 main(int argc, char *argv[])
 {
-	printf("C AVL example program\n");
+	printf("C AVL example program\n"
+	    "Enter something in stdin and enter a EOF\n");
 
 	struct tree	*t;
-	int		 data, data2, data3, data4, data5, data6;
-	data = 5; data2 = 99; data3 = 9; data4 = 99999; data5 = 1; data6 = -1;
+	char		*aux;
+	FILE		*ifp = stdin;
 
 	/* create a new tree */
 	t = new_tree();
 	/* assign a compare function */
-	TREE_COMPARE_FUNC(t, num_cmp);
+	TREE_COMPARE_FUNC(t, str_cmp);
 
-	/* In real world application you wouldn't be using
-	 * like this, instead you should use pointers to your
-	 * application data type and allocate it dynamically
-	 */
-	tree_addnode(t, &data);
-	tree_addnode(t, &data2);
-	tree_addnode(t, &data3);
-	tree_addnode(t, &data4);
-	tree_addnode(t, &data5);
-	tree_addnode(t, &data6);
+	while (!feof(ifp)) {
+		aux = malloc(64);
+		aux[63] = '\0';
+		fscanf(ifp, "%62s", aux);
+		tree_addnode(t, aux);
+	}
 
 	printf("\n");
 	tree_print(t);

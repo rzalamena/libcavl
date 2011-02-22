@@ -14,10 +14,15 @@
  * OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  */
 
-#include <stdio.h>
 #include <stdlib.h>
 
 #include "libcavl.h"
+
+/* prototypes */
+static int	 tree_balance(struct tree *);
+struct treenode	*treenode_balance(struct treenode *);
+static struct treenode *tree_balance_rec(struct treenode *);
+
 
 static int
 default_cmp(void *n1, void *n2)
@@ -43,15 +48,15 @@ new_tree(void)
 int
 tree_addnode(struct tree *t, void *e)
 {
-	int status = 0;
+	int status = SUCCESS;
 
 	if (NULL == t)
-		return -1;
+		return ENULLTREE;
 
-	if ((status = tree_justaddnode(t, e)) != 0)
+	if ((status = tree_justaddnode(t, e)) != SUCCESS)
 		return status;
 
-	if ((status = tree_balance(t)) != 0)
+	if ((status = tree_balance(t)) != SUCCESS)
 		return status;
 
 	return status;
@@ -63,11 +68,11 @@ tree_justaddnode(struct tree *t, void *e)
 	struct treenode		*n, *helper;
 
 	if (NULL == t)
-		return -1;
+		return ENULLTREE;
 
 	n = malloc(sizeof(struct treenode));
 	if (NULL == n)
-		return -1;
+		return EMALLOC;
 
 	/* initialize the node to avoid trash */
 	n->elem = e;
@@ -76,14 +81,12 @@ tree_justaddnode(struct tree *t, void *e)
 
 	if (NULL == t->root) {
 		t->root = n;
-		return 0;
+		return SUCCESS;
 	}
 
 	if (NULL == t->n_cmp)
 		t->n_cmp = default_cmp;
-	/* add node to tree in respecting order to minimize
-	 * node balance impact, this only applies to justaddnode calls
-	 */
+
 	helper = t->root;
 	while (helper != NULL) {
 		if (t->n_cmp(helper->elem, n->elem) > 0) {
@@ -93,50 +96,70 @@ tree_justaddnode(struct tree *t, void *e)
 				helper->left = n;
 				break;
 			}
-		} else {
+		} else if (t->n_cmp(helper->elem, n->elem) < 0) {
 			if (helper->right != NULL) {
 				helper = helper->right;
 			} else {
 				helper->right = n;
 				break;
 			}
+		} else {
+			free(n);
+			/* usually its not allowed repeated elements
+			 * so lets just ignore it and play safe */
+			return WDUPLICATEDVALUE;
 		}
 	}
-
-	return 0;
+	return SUCCESS;
 }
 
 int
 tree_delnode(struct tree *t, struct treenode *n)
 {
 	if (NULL == t || NULL == n)
-		return -1;
+		return ENULLTREE | ENULLNODE;
 
 	/* TODO See if we can try to free node content
 	 * Remove node, try to balance it
 	 */
-	return 1;
+	return ETODO;
 }
 
 int
 tree_height(struct tree *t)
 {
 	if (NULL == t || NULL == t->root)
-		return -1;
+		return ENULLTREE | ENULLNODE;
 
 	return treenode_height(t->root);
 }
 
-int
+static int
 tree_balance(struct tree *t)
 {
 	if (NULL == t)
-		return -1;
+		return ENULLTREE;
 
-	if (t->root != NULL)
-		return treenode_balance(t->root);
-	else
-		return -1;
+	if (t->root != NULL) {
+		t->root = tree_balance_rec(t->root);
+	} else
+		return ENULLNODE;
+
+	return SUCCESS;
+}
+
+static struct treenode *
+tree_balance_rec(struct treenode *n)
+{
+	if (n == NULL)
+		return NULL;
+
+	if (n->left != NULL)
+		n->left = tree_balance_rec(n->left);
+	if (n->right != NULL)
+		n->right = tree_balance_rec(n->right);
+
+	return treenode_balance(n);
 }
 
 int
@@ -146,7 +169,7 @@ treenode_height(struct treenode *n)
 	left = right = 0;
 
 	if (NULL == n)
-		return -1;
+		return 0;
 
 	if (n->left != NULL)
 		left = treenode_height(n->left);
@@ -156,19 +179,59 @@ treenode_height(struct treenode *n)
 	return (left > right) ? ++left : ++right;
 }
 
-int
+static struct treenode *
+treenode_rotateleft(struct treenode *n)
+{
+	struct treenode	*t = n->right;
+	n->right = t->left;
+	t->left = n;
+	return t;
+}
+
+static struct treenode *
+treenode_rotateright(struct treenode *n)
+{
+	struct treenode *t = n->left;
+	n->left = t->right;
+	t->right = n;
+	return t;
+}
+
+static struct treenode *
+treenode_doublerotateleft(struct treenode *n)
+{
+	n = treenode_rotateright(n->right);
+	return treenode_rotateleft(n);
+}
+
+static struct treenode *
+treenode_doublerotateright(struct treenode *n)
+{
+	n = treenode_rotateleft(n->left);
+	return treenode_rotateright(n);
+}
+
+struct treenode *
 treenode_balance(struct treenode *n)
 {
 	if (NULL == n)
-		return -1;
+		return NULL;
 
-	/* TODO balance this specified node
-	 * we need the tree node height to do this
-	 * the algorithm says: -1, 0 and 1 are ok
-	 * > 1 and < -1 means unbalanced tree
-	 * 
-	 * TODO add, check heights and balance tree.
-	 * Benchmark it
-	 */
-	return 0;
+	int	 right = treenode_height(n->right),
+	    left = treenode_height(n->left);
+
+	if (left - right > 1) {
+		if (treenode_height(n->left->right)
+		    - treenode_height(n->left->left) > 1)
+			return treenode_doublerotateright(n);
+		else
+			return treenode_rotateright(n);
+	} else if (right - left > 1) {
+		if (treenode_height(n->right->left)
+		    - treenode_height(n->right->right) > 1)
+			return treenode_doublerotateleft(n);
+		else
+			return treenode_rotateleft(n);
+	}
+	return n;
 }
