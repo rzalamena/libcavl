@@ -32,6 +32,8 @@ struct tree {
 struct tree	*new_tree(void);
 /* Add node and balance it */
 int		 tree_addnode(struct tree *, void *);
+/* Search for value in tree using compare function */
+struct treenode *tree_search(struct tree *, void *);
 /* just add nodes, usefull for batch add.
  * If you want to use it the tree properly later, call tree_balance */
 int		 tree_justaddnode(struct tree *, void *);

@@ -8,7 +8,8 @@ static int
 num_cmp(void *n1, void *n2)
 {
 	int	*na = n1, *nb = n2;
-	return (*na < *nb) ? -1 : 1;
+	return (*na < *nb) ? -1 :
+	    (*na > *nb) ? 1 : 0;
 }
 
 /* Print functions aren't provided with the libcavl,
@@ -70,8 +71,11 @@ main(int argc, char *argv[])
 	printf("C AVL example program\n");
 
 	struct tree	*t;
-	int		 data, data2, data3, data4, data5, data6;
+	struct treenode	*aux;
+	int		 data, data2, data3, data4, data5,
+	    data6, data_find, data_find2;
 	data = 5; data2 = 99; data3 = 9; data4 = 99999; data5 = 1; data6 = -1;
+	data_find = 1; data_find2 = -2;
 
 	/* create a new tree */
 	t = new_tree();
@@ -92,6 +96,16 @@ main(int argc, char *argv[])
 	printf("\n");
 	tree_print(t);
 	printf("\nHeight == %d\n", tree_height(t));
+
+	if ((aux = tree_search(t, &data_find)) != NULL)
+		printf("Found %d\n", *(int *) aux->elem);
+	else
+		printf("Did not find %d\n", data_find);
+
+	if ((aux = tree_search(t, &data_find2)) != NULL)
+		printf("Found %d\n", *(int *) aux->elem);
+	else
+		printf("Did not find %d\n", data_find2);
 
 	return 0;
 }

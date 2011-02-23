@@ -6,7 +6,7 @@ threads are never safe.
 
 Status
 ---
-We can add items and see them sorted, there is no node removal or search yet.
+We can add items and see them sorted, there is no node removal yet.
 Balance functions are ready, batch insertion is ready as well, if you want to
 use it after a batch insertion you must call tree_balance, otherwise the tree
 will be unreliable / unusable.
@@ -15,4 +15,5 @@ TODO
 ---
 * Tree deletion
 * Tree node deletion
-* Search
+* Tree node batch deletion
+* Tree node post deletion routine

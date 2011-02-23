@@ -27,7 +27,8 @@ static struct treenode *tree_balance_rec(struct treenode *);
 static int
 default_cmp(void *n1, void *n2)
 {
-	return (n1 < n2) ? -1 : 1;
+	return (n1 < n2) ? -1 :
+	    (n1 > n2) ? 1 : 0;
 }
 
 struct tree *
@@ -43,6 +44,35 @@ new_tree(void)
 	t->n_cmp = NULL;
 
 	return t;
+}
+
+struct treenode *
+tree_search(struct tree *t, void *e)
+{
+	struct treenode	*aux;
+	int		 res;
+
+	if (NULL == t->root)
+		return NULL;
+	
+	aux = t->root;
+	do {
+		res = t->n_cmp(aux->elem, e);
+		if (res == 0)
+			return aux;
+		else if (res > 0) {
+			if (aux->left != NULL)
+				aux = aux->left;
+			else
+				return NULL;
+		} else {
+			if (aux->right != NULL)
+				aux = aux->left;
+			else
+				return NULL;
+		}
+	} while (aux->left != NULL || aux->right != NULL);
+	return NULL;
 }
 
 int
