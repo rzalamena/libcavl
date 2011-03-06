@@ -75,7 +75,7 @@ main(int argc, char *argv[])
 	int		 data, data2, data3, data4, data5,
 	    data6, data_find, data_find2;
 	data = 5; data2 = 99; data3 = 9; data4 = 99999; data5 = 1; data6 = -1;
-	data_find = 1; data_find2 = -2;
+	data_find = 99; data_find2 = -2;
 
 	/* create a new tree */
 	t = new_tree();
@@ -101,6 +101,12 @@ main(int argc, char *argv[])
 		printf("Found %d\n", *(int *) aux->elem);
 	else
 		printf("Did not find %d\n", data_find);
+
+	printf("Deleting node %d...\n", *(int *) aux->elem);
+	tree_delnode(t, aux->elem);
+	printf("\n");
+	tree_print(t);
+	printf("\nHeight == %d\n", tree_height(t));
 
 	if ((aux = tree_search(t, &data_find2)) != NULL)
 		printf("Found %d\n", *(int *) aux->elem);

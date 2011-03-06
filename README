@@ -6,14 +6,24 @@ threads are never safe.
 
 Status
 ---
-We can add items and see them sorted, there is no node removal yet.
-Balance functions are ready, batch insertion is ready as well, if you want to
-use it after a batch insertion you must call tree_balance, otherwise the tree
-will be unreliable / unusable.
+We can add items, see them sorted and delete nodes.
+Tree batch adding and deleting functions were removed, since its easier to reach the same effect
+restoring a tree from a file with sorted nodes (using central scheme).
 
 TODO
 ---
-* Tree deletion
-* Tree node deletion
-* Tree node batch deletion
-* Tree node post deletion routine
++ Tree deletion
++ Tree copy (only create references to elements - warn user about copied tree manipulation*)
++ Tree clone (deep copy - copy elements as well)
++ Tree recreation (to use with tree's comparation functions changes - see TREE_COMPARE_FUNC**)
++ Tree save function (using central scheme to benefit from justaddnode function)
++ Tree load function
+
+* You cant free elements when you copy a tree, because the copied tree uses references
+this may cause problems. There are 2 possible solutions:
+1 - Just warn the user to not free elements of the trees (e.g. recommend nullifing n_del in both trees)
+2 - Create a flag in tree structure that tells when there are copies of the current tree,
+if there is a copy: dont call n_del, else: call n_del.
+
+** Basically it will do a tree copy arranging the nodes with the new n_cmp function,
+then remove the old tree that uses the old n_cmp.

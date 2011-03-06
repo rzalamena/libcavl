@@ -24,8 +24,10 @@ struct treenode {
 
 struct tree {
 	struct treenode	*root; /* root node pointer */
-	int		 (*n_cmp)(void *n1, void *n2);
 	/* function used to compare nodes */
+	int		 (*n_cmp)(void *elem1, void *elem2);
+	/* function used post node deletion */
+	int		 (*n_del)(void *elem);
 };
 
 /* Creates a new tree and initialize its structure */
@@ -34,14 +36,8 @@ struct tree	*new_tree(void);
 int		 tree_addnode(struct tree *, void *);
 /* Search for value in tree using compare function */
 struct treenode *tree_search(struct tree *, void *);
-/* just add nodes, usefull for batch add.
- * If you want to use it the tree properly later, call tree_balance */
-int		 tree_justaddnode(struct tree *, void *);
 /* Deletes specified node from the tree and balance it */
-int		 tree_delnode(struct tree *, struct treenode *);
-/* just remove node, usefull for batch removal,
- * Call tree_balance after using this */
-int		 tree_justdelnode(struct tree *, struct treenode *);
+int		 tree_delnode(struct tree *, void *);
 /* returns tree height */
 int		 tree_height(struct tree *);
 /* returns treenode height */
@@ -50,7 +46,10 @@ int		 treenode_height(struct treenode *);
 /* get treenode element */
 #define TREENODE_DATA(node) (node)->elem
 /* sets comparation function */
+/* TODO properly treat the tree after the comparation function change */
 #define TREE_COMPARE_FUNC(tree, function) (tree)->n_cmp = function
+/* sets node deletion handling function */
+#define TREE_DELETION_FUNC(tree, function) (tree)->n_del = function
 
 /* return statuses for reference */
 enum return_status {
@@ -59,7 +58,8 @@ enum return_status {
 	ETODO			= (1 << 1),
 	EMALLOC			= (1 << 2),
 	ENULLTREE		= (1 << 3),
-	ENULLNODE		= (1 << 4)
+	ENULLNODE		= (1 << 4),
+	ENOTFOUND		= (1 << 5),
 };
 
 #endif /* _LIBCAVL_H_ */
