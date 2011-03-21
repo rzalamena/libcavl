@@ -18,16 +18,21 @@
 #define _LIBCAVL_H_
 
 struct treenode {
-	void		*elem; /* element */
-	struct treenode	*left, *right; /* node's children pointer */
+	void		*elem;		/* element */
+	struct treenode	*left, *right;	/* node's children pointer */
 };
 
 struct tree {
-	struct treenode	*root; /* root node pointer */
+	/* root node pointer */
+	struct treenode	*root;
 	/* function used to compare nodes */
 	int		 (*n_cmp)(void *elem1, void *elem2);
 	/* function used post node deletion */
 	int		 (*n_del)(void *elem);
+	/* iterator callback used in the iterator function */
+	int		 (*n_itr)(void *elem);
+	/* status storage variable */
+	int		 err;
 };
 
 /* Creates a new tree and initialize its structure */
@@ -42,24 +47,39 @@ int		 tree_delnode(struct tree *, void *);
 int		 tree_height(struct tree *);
 /* returns treenode height */
 int		 treenode_height(struct treenode *);
+/* uses n_itr callback while iterating through all nodes */
+int		 tree_iterate(struct tree *);
+/* returns error string */
+const char	*tree_strerror(struct tree *);
+/* deletes all nodes, calling node deletion callback on each node
+ * and deletes the tree structure
+ */
+int		 tree_delete(struct tree *);
 
 /* get treenode element */
 #define TREENODE_DATA(node) (node)->elem
+/* get error number */
+#define TREE_ERRNO(tree) (tree)->err
+
+/* Deletion function and iterator function must return
+ * 0 on success, else operations will abort */
 /* sets comparation function */
-/* TODO properly treat the tree after the comparation function change */
 #define TREE_COMPARE_FUNC(tree, function) (tree)->n_cmp = function
 /* sets node deletion handling function */
 #define TREE_DELETION_FUNC(tree, function) (tree)->n_del = function
+/* sets node iteration callback */
+#define TREE_ITERATOR_FUNC(tree, function) (tree)->n_itr = function
 
 /* return statuses for reference */
 enum return_status {
-	SUCCESS			= (0),
-	WDUPLICATEDVALUE	= (1 << 0),
-	ETODO			= (1 << 1),
-	EMALLOC			= (1 << 2),
-	ENULLTREE		= (1 << 3),
-	ENULLNODE		= (1 << 4),
-	ENOTFOUND		= (1 << 5),
+	TNOERROR,		/* OK */
+	TWDUPLICATEDVALUE,	/* duplicated node */
+	TEMALLOC,		/* no memory left */
+	TENULLNODE,		/* function expected non null node */
+	TEEMPTYTREE,		/* there are no root nodes */
+	TENOTFOUND,		/* node not found */
+	TEUSERCALLBACK,		/* user callback returned error */
+	TEMISSINGCALLBACK,	/* no callback defined */
 };
 
 #endif /* _LIBCAVL_H_ */

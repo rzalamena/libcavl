@@ -12,26 +12,19 @@ num_cmp(void *n1, void *n2)
 	    (*na > *nb) ? 1 : 0;
 }
 
+
 /* Print functions aren't provided with the libcavl,
  * because they are not generic enough to be there.
  * Anyway they would be only usefull for debugging.
  */
 
-static void
-treenode_print(struct treenode *n)
+static int
+itr_print(void *n1)
 {
-	int	*tmp;
-
-	if (NULL == n)
-		return;
-
-	tmp = TREENODE_DATA(n);
-
-	if (n->left != NULL)
-		treenode_print(n->left);
-	printf(" %d", *tmp);
-	if (n->right != NULL)
-		treenode_print(n->right);
+	int	*i;
+	i = (int *) n1;
+	printf("%d ", *i);
+	return 0;
 }
 
 static void
@@ -62,7 +55,8 @@ static void
 tree_print(struct tree *t)
 {
 	treenode_print_alt(t->root, 0);
-	treenode_print(t->root);
+	printf("\n");
+	tree_iterate(t);
 }
 
 int
@@ -81,6 +75,7 @@ main(int argc, char *argv[])
 	t = new_tree();
 	/* assign a compare function */
 	TREE_COMPARE_FUNC(t, num_cmp);
+	TREE_ITERATOR_FUNC(t, itr_print);
 
 	/* In real world application you wouldn't be using
 	 * like this, instead you should use pointers to your
@@ -113,5 +108,6 @@ main(int argc, char *argv[])
 	else
 		printf("Did not find %d\n", data_find2);
 
+	tree_delete(t);
 	return 0;
 }

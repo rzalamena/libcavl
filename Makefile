@@ -30,4 +30,4 @@ $(BINALT): $(OBJS)
 	@$(CC) -o $@ $(OBJS) strings.o;
 
 clean:
-	$(RM) -f $(BIN) $(BIN).core main.o $(BINALT) $(BINALT).core strings.o $(OBJS);
+	$(RM) -f $(BIN) $(BIN).core main.o $(BINALT) $(BINALT).core strings.o cscope.out $(OBJS);

@@ -12,6 +12,14 @@ str_cmp(void *n1, void *n2)
 	return (strcmp(na, nb));
 }
 
+static int
+node_del(void *elem)
+{
+	free(elem);
+	return 0;
+}
+
+
 /* Print functions aren't provided with the libcavl,
  * because they are not generic enough to be there.
  * Anyway they would be only usefull for debugging.
@@ -79,6 +87,7 @@ main(int argc, char *argv[])
 	t = new_tree();
 	/* assign a compare function */
 	TREE_COMPARE_FUNC(t, str_cmp);
+	TREE_DELETION_FUNC(t, node_del);
 
 	while (!feof(ifp)) {
 		aux = malloc(64);
@@ -86,10 +95,13 @@ main(int argc, char *argv[])
 		fscanf(ifp, "%62s", aux);
 		tree_addnode(t, aux);
 	}
-
 	printf("\n");
 	tree_print(t);
 	printf("\nHeight == %d\n", tree_height(t));
+	printf("Tree free\n");
+	if (tree_delete(t) == -1)
+		printf("%s", tree_strerror(t));
+	printf("End of program\n");
 
 	return 0;
 }
