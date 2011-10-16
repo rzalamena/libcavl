@@ -30,7 +30,7 @@ struct tree {
 	/* function used post node deletion */
 	int		 (*n_del)(void *elem);
 	/* iterator callback used in the iterator function */
-	int		 (*n_itr)(void *elem);
+	int		 (*n_itr)(void *elem, void *ctx);
 	/* status storage variable */
 	int		 err;
 };
@@ -48,7 +48,7 @@ int		 tree_height(struct tree *);
 /* returns treenode height */
 int		 treenode_height(struct treenode *);
 /* uses n_itr callback while iterating through all nodes */
-int		 tree_iterate(struct tree *);
+int		 tree_iterate(struct tree *, void *);
 /* returns error string */
 const char	*tree_strerror(struct tree *);
 /* deletes all nodes, calling node deletion callback on each node

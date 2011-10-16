@@ -19,7 +19,7 @@ num_cmp(void *n1, void *n2)
  */
 
 static int
-itr_print(void *n1)
+itr_print(void *n1, void *ctx)
 {
 	int	*i;
 	i = (int *) n1;
@@ -56,7 +56,7 @@ tree_print(struct tree *t)
 {
 	treenode_print_alt(t->root, 0);
 	printf("\n");
-	tree_iterate(t);
+	tree_iterate(t, NULL);
 }
 
 int

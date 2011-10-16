@@ -31,7 +31,7 @@ static struct treenode	*treenode_balance(struct treenode *);
 static int		 tree_justaddnode(struct tree *, void *);
 static int		 tree_justdelnode(struct tree *, void *);
 static int		 tree_balance(struct tree *);
-static int		 treenode_iterate(struct tree *, struct treenode *);
+static int		 treenode_iterate(struct tree *, struct treenode *, void *);
 static int		 treenode_delete(struct tree *, struct treenode *);
 
 struct tree *
@@ -374,7 +374,7 @@ treenode_balance(struct treenode *n)
 }
 
 int
-tree_iterate(struct tree *t)
+tree_iterate(struct tree *t, void *ctx)
 {
 	if (NULL == t->root) {
 		SET_TERRNO(t, TENULLNODE);
@@ -386,7 +386,7 @@ tree_iterate(struct tree *t)
 		return -1;
 	}
 
-	if (treenode_iterate(t, t->root) != 0) {
+	if (treenode_iterate(t, t->root, ctx) != 0) {
 		SET_TERRNO(t, TEUSERCALLBACK);
 		return -1;
 	}
@@ -394,21 +394,21 @@ tree_iterate(struct tree *t)
 }
 
 static int
-treenode_iterate(struct tree *t, struct treenode *n)
+treenode_iterate(struct tree *t, struct treenode *n, void *ctx)
 {
 	int	status = 0;
 
 	if (n->left != NULL)
-		status = treenode_iterate(t, n->left);
+		status = treenode_iterate(t, n->left, ctx);
 
 	if (status != 0)
 		return status;
 
-	if ((status = t->n_itr(n->elem)) != 0)
+	if ((status = t->n_itr(n->elem, ctx)) != 0)
 		return status;
 
 	if (n->right != NULL)
-		status = treenode_iterate(t, n->right);
+		status = treenode_iterate(t, n->right, ctx);
 
 	return status;
 }
